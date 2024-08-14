@@ -1,0 +1,63 @@
+{"chart_types": {
+      "bar_chart": {
+        "best_practices": [
+          "when the user wishes to show comparison between different classes",
+          "No vertical/slanted text",
+          "Sort/order the bars if possible",
+          "Lighten/remove unnecessary grids and borders",
+          "Direct labeling",
+          "Use 'Others' to consolidate categories if there are too many",
+          "avoid rotated text in axis titles."
+        ],
+        "forms": [
+          "Clustered Column Chart",
+          "Stacked Column Chart",
+          "100% Stacked Column/Bar (ratio)"
+        ]
+      },
+      "line_chart": {
+        "best_practices": [
+          "Not for comparison over categorical data",
+          "Use to show trends in data, how x varies with or depends on y",
+          "Avoid spaghetti graph",
+          "Avoid legend; direct label the lines",
+          "Remove grid lines and y-axis if possible",
+          "Make axis titles descriptive"
+        ]
+      },
+      "pie_chart": {
+        "best_practices": [
+          "Avoid pie charts in general",
+          "Do not use 3D pie chart",
+          "Do not use legend; direct label the slices",
+          "Start at 12 o’clock, goes clockwise direction",
+          "Sort data if possible",
+          "Few segments (maximum around 6)",
+          "Use shades of same color"
+        ]
+      },
+      "combo_charts": [
+        "Dual Axis Chart",
+        "Waterfall Chart"
+      ],
+      "scatter_plots": {
+        "best_practices": [
+          "Not for comparison over categorical data",
+          "Show how x varies with or depends on y in an easy to read way",
+          "Not for comparison over categorical data",
+          "Maybe use a legend, if appropriate",
+          "Remove grid lines and y-axis if possible",
+          "Make axis titles descriptive"
+        ],
+      "forms":[
+        "Scatter Plot",
+        "Bubble Plot"
+      ]},
+      "advanced_visualizations": [
+        "Nightingale’s Polar-Area Diagram",
+        "Parallel Coordinates Plot",
+        "Sankey Diagram",
+        "Network Diagram"
+      ]
+    }
+}
