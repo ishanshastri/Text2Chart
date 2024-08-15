@@ -6,7 +6,7 @@ from typing import List, Optional, Any
 import sys
 import os
 
-from DST_rag_utils import *#format_returned_guidelines_list
+from DST_rag_utils_v2 import *#format_returned_guidelines_list
 import pandas as pd
 import re
 import os
@@ -171,6 +171,20 @@ class StoryTeller:
         if self.llm is None:
             print("No llm set; use `set_llm` to set the llm.")
             return None
+        chain = self.init_chain(llm) if llm else self.chain
+        if not chain:
+            print("no chain initialized; you can rectify this by passing an llm")
+            return None
+
+        if self.df is None:
+            msg="No dataframe set. Please set dataframe df for StoryTeller"
+            print(msg)
+            raise Exception(msg)
+            return None
+        
+        if self.llm is None:
+            print("No llm set; use `set_llm` to set the llm.")
+            return None
         
         str_cols = ", ".join([str(k)+ ": " + str(v) for k, v in dict(self.df.dtypes).items()])
         if isinstance(prompt, str):
@@ -185,10 +199,84 @@ class StoryTeller:
         response_processed = self._clean_response(response=response)
 
         return (response_processed, url) if get_trace_url else response_processed
+
+    def code_generate_dict(self, prompt:Optional[str|dict], llm=None, library='plotly', get_trace_url=False):
+        output = {'err':None}
+        # {
+        #     'response':response_processed,
+        # }
+                
+        chain = self.init_chain(llm) if llm else self.chain
+        if not chain:
+            print("no chain initialized; you can rectify this by passing an llm")
+            return None
+
+        if self.df is None:
+            msg="No dataframe set. Please set dataframe df for StoryTeller"
+            print(msg)
+            raise Exception(msg)
+            return None
+        
+        if self.llm is None:
+            print("No llm set; use `set_llm` to set the llm.")
+            return None
+        chain = self.init_chain(llm) if llm else self.chain
+        if not chain:
+            print("no chain initialized; you can rectify this by passing an llm")
+            return None
+
+        if self.df is None:
+            msg="No dataframe set. Please set dataframe df for StoryTeller"
+            print(msg)
+            output['err'] = "No dataframe set. Please set dataframe df for StoryTeller"
+            return output
+            raise Exception(msg)
+            return None
+        
+        if self.llm is None:
+            output['err'] = "No llm set; use `set_llm` to set the llm."
+            return output
+            print("No llm set; use `set_llm` to set the llm.")
+
+            return None
+        
+        str_cols = ", ".join([str(k)+ ": " + str(v) for k, v in dict(self.df.dtypes).items()])
+        if isinstance(prompt, str):
+            prompt = {'question':prompt,
+                        'columns_and_types':str_cols,
+                        'num_cols':len(self.df.columns),
+                        'library':library,
+                        'chart_types':str(self.accepted_chart_types)}
+        with tracing_v2_enabled() as cb:
+            try:
+                response = chain.invoke(prompt)
+            except Exception as e:
+                output['err'] = f"LLM error during code generation: {str(e)}"
+                return output
+
+            url = cb.get_run_url()
+        response_processed = self._clean_response(response=response)
+
+
+        output['code'] = response_processed
+        if get_trace_url:
+            output['url'] = url
+
+        return output
+        return (response_processed, url) if get_trace_url else response_processed
     
     def generate_and_execute(self, prompt:Optional[str|dict], llm=None, library='plotly', get_trace_url=False, get_traceback=True):
-        code, url = self.code_generate(prompt, llm=llm, library=library, get_trace_url=True)
+        # code, url = self.code_generate(prompt, llm=llm, library=library, get_trace_url=True)
+        output = {'err':None}
+        resp = self.code_generate_dict(prompt, llm=llm, library=library, get_trace_url=True)
+        code, url, codegen_err = resp.get('code'), resp.get('url'), resp.get('err')
 
+        if codegen_err:
+            output['code'] = code
+            output['fig'] = None
+            output['err'] = codegen_err
+            return output
+        
         output = {}
         output['code'] = code
         if get_trace_url:
@@ -242,14 +330,22 @@ class StoryTeller:
     
     def generate_with_llm_fallback(self, prompt:str, library='plotly', llms_and_configs:dict = None, get_trace_url=False, get_traceback=True):#llms:list=['mistral_7b', 'gemini-pro'], llm_configs:dict=None):
         llms_and_configs = llms_and_configs if llms_and_configs else DEFAULT_LLM_CONFIGS
+        err_logs = []
         for k, v in llms_and_configs.items():
-            llm = LLM_ENDPOINTS[k](**v)
+            try:
+                llm = LLM_ENDPOINTS[k](**v)
+            except Exception as e:
+                # output['err_logs'] 
+                err_logs.append(f"Error trying to initialize LLM: {str(e)}")
+                continue
             output = self.generate_and_execute(prompt=prompt, llm=llm, library=library, get_trace_url=get_trace_url, get_traceback=get_traceback)
             print("output from generate_and_execute: ", output)
             if not output['err']:
                 output['llm_used'] = k
+                output['err_logs'] = err_logs
                 return output
             print("error: ", output['err'])
+            err_logs.append(f"Error while trying to execute code: {output['err']}")
         pass
 
     def get_default_params(self):

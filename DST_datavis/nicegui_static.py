@@ -6,7 +6,7 @@ from DST_GPT_v5 import StoryTeller, DEFAULT_LLM_CONFIGS, LLM_ENDPOINTS
 from DST_rag_utils_v2 import *
 from typing import Optional, List
 
-JSON_GUIDELINE_FNAME = '/Users/ishanshastri/Desktop/nus/DST/main_proj/json_chart_types.json'#'json_chart_types.json'
+JSON_GUIDELINE_FNAME = 'json_chart_types.json'
 
 default_llm_configs = DEFAULT_LLM_CONFIGS.copy()
 llm_endpoints = LLM_ENDPOINTS.copy()
@@ -57,13 +57,17 @@ async def generate_image():
 
     except Exception as e:
         print("error during call to generate: ", str(e))
+        tabs_llm.value
         ui.label(f"ERROR: {str(e)}")
 
     image.delete()
     if prediction and prediction.get('fig', None):
         ui.plotly(prediction['fig'])
-        lm = prediction.get('llm', "unsure.")
+        lm = prediction.get('llm_used', "unsure.")
         ui.label(f'Following LLM was used: {lm}')
+        if prediction.get('err', None):
+            print("Following error encountered during (initial) generation attempt: ", prediction['err'])
+            ui.label(f"Following error encountered during (initial) generation attempt: {prediction['err']}")
 
 async def toggle_guideline_selection():
     if not guidelines_txtbox.value:
@@ -76,6 +80,8 @@ async def toggle_guideline_selection():
 
     else:
         storyteller.set_main_retriever(retriever=retriever)
+
+# def _update_fallback_ordering(llm_name, )
     
 async def update_storyteller(endpoint_selected='huggingface'):
     print("model updated to: ", endpoint_selected)
@@ -111,11 +117,11 @@ with ui.row().style('gap:10em'):
             with ui.row():
                 ui.textarea(label=k, value=v).style('width: 30em').bind_value(prompt_params, target_name=k)
         ui.label('LLM Parameters').classes('text-2xl')
-        with ui.tabs() as tabs:
+        with ui.tabs() as tabs_llm:
             ui.tab('huggingface', label='Huggingface')
             ui.tab('google', label='Google')
             ui.tab('openai', label='OpenAI')
-        with ui.tab_panels(tabs, value='huggingface').classes('w-full'):
+        with ui.tab_panels(tabs_llm, value='huggingface').classes('w-full'):
             with ui.tab_panel('huggingface'):
                 for k, v in default_llm_configs['huggingface'].items():
                     with ui.row():
@@ -132,6 +138,6 @@ with ui.row().style('gap:10em'):
                     with ui.row():
                         ui.input(label=k, value=v).bind_value(ordered_fallback_models_dict['openai'], target_name=k)
 
-        ui.button('Update', on_click=lambda : update_storyteller(tabs.value)).style('width: 15em')
+        ui.button('Update', on_click=lambda : update_storyteller(tabs_llm.value)).style('width: 15em')
                 
 ui.run()
