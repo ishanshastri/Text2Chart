@@ -17,7 +17,6 @@ from typing import Optional, List
 
 DEBUG = os.getenv('DEBUG')
 
-
 RETRIEVERS_DICT = {
     'chroma':Chroma,
 }
