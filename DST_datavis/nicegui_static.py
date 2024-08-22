@@ -80,8 +80,6 @@ async def toggle_guideline_selection():
 
     else:
         storyteller.set_main_retriever(retriever=retriever)
-
-# def _update_fallback_ordering(llm_name, )
     
 async def update_storyteller(endpoint_selected='huggingface'):
     print("model updated to: ", endpoint_selected)

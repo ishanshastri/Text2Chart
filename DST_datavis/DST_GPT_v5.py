@@ -6,7 +6,7 @@ from typing import List, Optional, Any
 import sys
 import os
 
-from DST_rag_utils_v2 import *#format_returned_guidelines_list
+from DST_rag_utils_v2 import *
 import pandas as pd
 import re
 import os
