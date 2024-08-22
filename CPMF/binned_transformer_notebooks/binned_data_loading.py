@@ -13,10 +13,6 @@ def get_log_returns(tick, start='2020-01-01', end='2022-01-01'):
     closings = ffn.get(tick, start=start, end=end)
     returns = closings.to_log_returns().dropna()
 
-    # lower_bin = -5
-    # upper_bin = 5
-    # bin_range = upper_bin-lower_bin+2
-    # returns['log_returns'] = pd.cut(returns[tick], bins=np.array([-np.inf] + list(range(lower_bin, upper_bin+1)) + [np.inf])/100.0, labels=range(bin_range))
     return returns
 
 
@@ -33,10 +29,8 @@ def get_rolling_window(df:pd.DataFrame, context_length=None, predict_length=None
         return [s.to_dict(orient='list') for s in (rolling_bins)][win_size:]
     
     rolling_bins = [list(s.values) for s in (rolling_bins)][win_size:]
-    # rolling_bins
 
-    #data_df = pd.DataFrame({'x':rolling_bins})
-    return rolling_bins#data_df
+    return rolling_bins
     
 
 def bin_returns(df_col, lower_bin, upper_bin, num_bins, as_pct=True, get_label_map=False):#, bins=None):
